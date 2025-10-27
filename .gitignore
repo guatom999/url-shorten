@@ -1,0 +1,88 @@
+# Binaries# Binaries
+
+*.exe*.exe
+
+*.dll*.exe~
+
+*.so*.dll
+
+*.dylib*.so
+
+*.dylib
+
+# Test binarybin/
+
+*.testdist/
+
+
+
+# Output of go coverage tool# Test binary
+
+*.out*.test
+
+
+
+# Go workspace file# Output of go coverage tool
+
+go.work*.out
+
+coverage.html
+
+# Environment files
+
+.env# Go workspace file
+
+.env.localgo.work
+
+
+
+# IDE files# Environment files
+
+.vscode/.env
+
+.idea/.env.local
+
+*.swp
+
+*.swo# IDE
+
+.vscode/
+
+# OS files.idea/
+
+.DS_Store*.swp
+
+Thumbs.db*.swo
+
+
+
+# Logs# OS
+
+*.log.DS_Store
+
+.DS_Store?
+
+# Dependencies._*
+
+vendor/.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Dependencies
+vendor/
+
+# Temporary files
+tmp/
+temp/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+*.env

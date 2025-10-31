@@ -54,7 +54,7 @@ func (r *urlRepository) Create(ctx context.Context, url *model.URL) (*model.URLI
 
 	url.ClickCount = 1
 
-	query := `INSERT INTO urls (short_code, original_url,click_count) VALUES ($1, $2 ,$3) RETURNING id`
+	query := `INSERT INTO urls (short_code, original_url,click_count) VALUES ($1, $2 ,$3) RETURNING id, created_at, updated_at`
 
 	err := r.db.QueryRowContext(ctx, query, url.ShortCode, url.OriginalURL, url.ClickCount).Scan(&url.ID, &url.CreatedAt, &url.UpdatedAt)
 

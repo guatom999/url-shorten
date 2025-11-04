@@ -12,15 +12,3 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
-
-type CreateShortenUrlReq struct {
-	OriginalUrl string `json:"original_url"`
-}
-
-type CreateShortenUrlRes struct {
-	Id          string    `json:"id"`
-	ShortUrl    string    `json:"short_url"`
-	OriginalURL string    `json:"original_url"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-}

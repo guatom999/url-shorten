@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"log"
 	"shorten-url/internal/model"
 	"time"
@@ -13,9 +14,9 @@ import (
 type URLRepository interface {
 	Create(ctx context.Context, url *model.URL) (*model.URLInterpeter, error)
 	GetByShortCode(ctx context.Context, shortCode string) (*model.URL, error)
-	// GetByID(id uint) (*model.URL, error)
-	// Update(url *model.URL) error
-	// Delete(id uint) error
+	UpdateShortUrl(pctx context.Context, shortCode string, updatedUrl string) (*model.URL, error)
+	DeleteByShortCode(ctx context.Context, shortCode string) error
+	UpdateShortUrlCount(pctx context.Context, shortCode string) error
 }
 
 // Example repository struct - modify as needed
@@ -28,6 +29,35 @@ func NewURLRepository(db *sqlx.DB) URLRepository {
 	return &urlRepository{
 		db: db,
 	}
+}
+
+func (r *urlRepository) UpdateShortUrlCount(pctx context.Context, shortCode string) error {
+	ctx, cancel := context.WithTimeout(pctx, time.Second*10)
+	defer cancel()
+
+	query := `UPDATE urls 
+              SET click_count = click_count + 1, updated_at = CURRENT_TIMESTAMP 
+              WHERE short_code = $1`
+
+	result, err := r.db.ExecContext(ctx, query, shortCode)
+	if err != nil {
+		log.Printf("Error updating click count for short code %s: %v", shortCode, err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Error checking rows affected for short code %s: %v", shortCode, err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		log.Printf("No URL found with short code: %s", shortCode)
+		return errors.New("no URL found with the given short code")
+	}
+
+	return nil
+
 }
 
 func (r *urlRepository) GetByShortCode(ctx context.Context, shortCode string) (*model.URL, error) {
@@ -45,6 +75,61 @@ func (r *urlRepository) GetByShortCode(ctx context.Context, shortCode string) (*
 	}
 
 	return url, nil
+}
+
+func (r *urlRepository) UpdateShortUrl(pctx context.Context, shortCode string, updatedUrl string) (*model.URL, error) {
+
+	ctx, cancel := context.WithTimeout(pctx, time.Second*10)
+	defer cancel()
+
+	query := `UPDATE urls 
+              SET original_url = $1, updated_at = CURRENT_TIMESTAMP 
+              WHERE short_code = $2 
+              RETURNING id, short_code, original_url, click_count, created_at, updated_at`
+
+	urlData := new(model.URL)
+
+	if err := r.db.QueryRowContext(ctx, query, updatedUrl, shortCode).Scan(
+		&urlData.ID,
+		&urlData.ShortCode,
+		&urlData.OriginalURL,
+		&urlData.ClickCount,
+		&urlData.CreatedAt,
+		&urlData.UpdatedAt,
+	); err != nil {
+		log.Printf("Error updating short url: %v", err)
+		return nil, err
+	}
+
+	return urlData, nil
+}
+
+func (r *urlRepository) DeleteByShortCode(ctx context.Context, shortCode string) error {
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+
+	query := `DELETE FROM urls WHERE short_code = $1 `
+
+	result, err := r.db.ExecContext(ctx, query, shortCode)
+	if err != nil {
+		log.Printf("Error deleting URL by short code: %v", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Error checking rows affected for delete by shortcode %s: %v", shortCode, err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		log.Printf("no URL found with short code: %s", shortCode)
+		return errors.New("no URL found with the given short code")
+	}
+
+	log.Printf("Successfully deleted URL with short code: %s", shortCode)
+	return nil
 }
 
 func (r *urlRepository) Create(ctx context.Context, url *model.URL) (*model.URLInterpeter, error) {

@@ -77,13 +77,18 @@ func (s *server) ShortenModules() {
 	shortenService := service.NewURLService(shortenRepo)
 	shortenHandler := handler.NewHandler(shortenService)
 
-	route := s.app.Group("/v1/shorten")
+	s.app.GET("/:short_code", shortenHandler.GetShortenURL)
 
-	route.GET("/:short_code", shortenHandler.GetShortenURL)
+	route := s.app.Group("/shorten")
+
+	route.GET("/:short_code", shortenHandler.RetrieveOriginalURL)
+	route.GET("/:short_code/stat", shortenHandler.GetUrlStatic)
+
+	route.PUT("/:short_code", shortenHandler.UpdateShortenURL)
+
+	route.DELETE("/:short_code", shortenHandler.DeleteUrl)
 
 	route.POST("/", shortenHandler.CreateShortenURL)
-
-	// implement leayer of shorten
 
 }
 

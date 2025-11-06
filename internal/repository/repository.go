@@ -17,6 +17,7 @@ type URLRepository interface {
 	UpdateShortUrl(pctx context.Context, shortCode string, updatedUrl string) (*model.URL, error)
 	DeleteByShortCode(ctx context.Context, shortCode string) error
 	UpdateShortUrlCount(pctx context.Context, shortCode string) error
+	IsShortCodeExists(pctx context.Context, shortCode string) bool
 }
 
 // Example repository struct - modify as needed
@@ -148,4 +149,21 @@ func (r *urlRepository) Create(ctx context.Context, url *model.URL) (*model.URLI
 		CreatedAt: url.CreatedAt,
 		UpdatedAt: url.UpdatedAt,
 	}, err
+}
+
+func (r *urlRepository) IsShortCodeExists(pctx context.Context, shortCode string) bool {
+
+	ctx, cancel := context.WithTimeout(pctx, time.Second*5)
+	defer cancel()
+
+	query := `SELECT COUNT(1) FROM urls WHERE short_code = $1`
+
+	var count int
+	err := r.db.QueryRowContext(ctx, query, shortCode).Scan(&count)
+	if err != nil {
+		log.Printf("Error checking if short code exists: %v", err)
+		return false
+	}
+
+	return count > 0
 }

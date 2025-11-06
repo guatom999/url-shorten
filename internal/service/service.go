@@ -2,9 +2,10 @@ package service
 
 import (
 	"context"
-	"errors"
 	"log"
+
 	"shorten-url/internal/entities"
+	appErrors "shorten-url/internal/errors"
 	"shorten-url/internal/model"
 	"shorten-url/internal/repository"
 	"shorten-url/utils"
@@ -37,11 +38,11 @@ func (s *urlService) GetOriginalURL(pctx context.Context, shortCode string) (str
 
 	url, err := s.repo.GetByShortCode(pctx, shortCode)
 	if err != nil {
-		return "", err
+		return "", appErrors.NewNotFoundError("short url was not found")
 	}
 
 	if err := s.repo.UpdateShortUrlCount(pctx, shortCode); err != nil {
-		return "", err
+		return "", appErrors.NewInternalError("failed to update click count", err)
 	}
 
 	return url.OriginalURL, nil
@@ -49,8 +50,12 @@ func (s *urlService) GetOriginalURL(pctx context.Context, shortCode string) (str
 
 func (s *urlService) DeleteShortUrl(pctx context.Context, shortCode string) error {
 
+	if !s.repo.IsShortCodeExists(pctx, shortCode) {
+		return appErrors.NewNotFoundError("short url was not found")
+	}
+
 	if err := s.repo.DeleteByShortCode(pctx, shortCode); err != nil {
-		return errors.New("failed to delete short url ")
+		return appErrors.NewInternalError("failed to delete short url", err)
 	}
 
 	return nil
@@ -61,7 +66,7 @@ func (s *urlService) RetrieveOriginalURL(pctx context.Context, shortCode string)
 	url, err := s.repo.GetByShortCode(pctx, shortCode)
 	if err != nil {
 		log.Printf("Error: failed to retrieve original url %s", err.Error())
-		return nil, errors.New("failed to retrieve original url ")
+		return nil, appErrors.NewNotFoundError("short url was not found")
 	}
 
 	return &entities.RetriveOriginalUrlRes{
@@ -78,7 +83,7 @@ func (s *urlService) UpdateShortUrl(pctx context.Context, shortCode string, upda
 	url, err := s.repo.UpdateShortUrl(pctx, shortCode, updatedUrl)
 	if err != nil {
 		log.Printf("Error: failed to update short url %s", err.Error())
-		return nil, errors.New("failed to update short url ")
+		return nil, appErrors.NewInternalError("failed to update short url", err)
 	}
 
 	return url, nil
@@ -95,7 +100,7 @@ func (s *urlService) ShortenURL(pctx context.Context, originalURL string) (*enti
 	})
 	if err != nil {
 		log.Printf("Error: failed to creat shorten url %s", err.Error())
-		return nil, errors.New("failed to created shorten url ")
+		return nil, appErrors.NewInternalError("failed to created shorten url", err)
 	}
 
 	return &entities.CreateShortenUrlRes{
@@ -111,7 +116,7 @@ func (s *urlService) GetUrlStatic(pctx context.Context, shortCode string) (*enti
 
 	url, err := s.repo.GetByShortCode(pctx, shortCode)
 	if err != nil {
-		return nil, err
+		return nil, appErrors.NewNotFoundError("short url was not found")
 	}
 
 	return &entities.UrlStaticRes{

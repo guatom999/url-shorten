@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"shorten-url/configs"
-	"shorten-url/internal/databases"
 	"shorten-url/internal/server"
 )
 
@@ -17,7 +16,7 @@ func main() {
 		log.Fatal("Failed to load config:", err)
 	}
 
-	db := databases.DatabaseConnect(cfg)
+	// db := databases.DatabaseConnect(cfg)
 
 	log.Printf("Loaded config: Server will run on %s:%s", cfg.Server.Host, cfg.Server.Port)
 

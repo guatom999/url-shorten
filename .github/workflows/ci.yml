@@ -27,3 +27,10 @@ jobs:
 
       - name: Build application
         run: go build ./cmd/app
+
+      - name: Discord notification
+        if: always()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '{"project_name": "Shorten-Url", "status": "test build status"}'

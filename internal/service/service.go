@@ -29,9 +29,7 @@ type urlService struct {
 
 // NewURLService creates a new URL service
 func NewURLService(repo repository.URLRepository) URLService {
-	return &urlService{
-		repo: repo,
-	}
+	return &urlService{}
 }
 
 func (s *urlService) GetOriginalURL(pctx context.Context, shortCode string) (string, error) {

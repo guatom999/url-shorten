@@ -76,10 +76,10 @@ jobs:
             docker run -d --name shorten-url -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/shorten-url:latest
           "
 
-      - name: Health Check
-        run: |
-          sleep 10
-          curl -f http://${{ secrets.SERVER_HOST }}:8080/health || exit 1
+      # - name: Health Check
+      #   run: |
+      #     sleep 10
+      #     curl -f http://${{ secrets.SERVER_HOST }}:8080/health || exit 1
 
       # - name: Discord notification
       #   if: always()

@@ -11,7 +11,6 @@ import (
 
 func main() {
 
-	//test
 	log.Println("Starting application...")
 
 	cfg, err := configs.LoadConfig("../../.env")

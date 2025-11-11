@@ -40,6 +40,17 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Test SSH Connection
+        run: |
+          echo "Testing SSH connection..."
+          ssh -o ConnectTimeout=10 root@${{ secrets.SERVER_HOST }} "
+            echo 'SSH connection successful!'
+            echo 'Server hostname:' \$(hostname)
+            echo 'Current user:' \$(whoami)
+            echo 'Current time:' \$(date)
+            echo 'Docker version:' \$(docker --version)
+          "
+
       - name: Deploy to server
         run: |
           ssh root@${{ secrets.SERVER_HOST }} "

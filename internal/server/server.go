@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"shorten-url/configs"
@@ -42,14 +43,11 @@ func (s *server) Start() {
 
 	ctx := context.Background()
 
-	// Request Timeout
 	s.app.Use(middleware.TimeoutWithConfig(middleware.TimeoutConfig{
 		Skipper:      middleware.DefaultSkipper,
 		ErrorMessage: "Error: Request Timeout",
 		Timeout:      time.Second * 10,
 	}))
-
-	//Cors
 	s.app.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		Skipper:      middleware.DefaultSkipper,
 		AllowOrigins: []string{"*"},
@@ -78,6 +76,10 @@ func (s *server) ShortenModules() {
 	shortenHandler := handler.NewHandler(shortenService)
 
 	s.app.GET("/:short_code", shortenHandler.GetShortenURL)
+
+	s.app.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, "✅ status ok")
+	})
 
 	route := s.app.Group("/shorten")
 

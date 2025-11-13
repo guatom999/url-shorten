@@ -19,15 +19,12 @@ type URLService interface {
 	UpdateShortUrl(pctx context.Context, shortCode string, updatedUrl string) (*model.URL, error)
 	DeleteShortUrl(pctx context.Context, shortCode string) error
 	GetUrlStatic(pctx context.Context, shortCode string) (*entities.UrlStaticRes, error)
-	// GetURLStats(shortCode string) (*model.URLStats, error)
 }
 
-// Example service struct - modify as needed
 type urlService struct {
 	repo repository.URLRepository
 }
 
-// NewURLService creates a new URL service
 func NewURLService(repo repository.URLRepository) URLService {
 	return &urlService{
 		repo: repo,

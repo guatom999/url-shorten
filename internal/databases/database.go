@@ -20,6 +20,15 @@ func DatabaseConnect(cfg *configs.Config) *sqlx.DB {
 		cfg.Database.SSLMode,
 	)
 
+	fmt.Printf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.Database.Host,
+		cfg.Database.Port,
+		cfg.Database.Username,
+		cfg.Database.Password,
+		cfg.Database.DBName,
+		cfg.Database.SSLMode,
+	)
+
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
 		panic(err)

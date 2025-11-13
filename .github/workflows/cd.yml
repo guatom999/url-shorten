@@ -40,46 +40,42 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Debug SSH Private Key # ← เพิ่ม step นี้
+      - name: Copy compose file to server
         run: |
-          echo "=== SSH Private Key Debug ==="
-          echo "File exists: $(test -f ~/.ssh/id_rsa && echo 'YES' || echo 'NO')"
-          echo "File size: $(wc -c < ~/.ssh/id_rsa) bytes"
-          echo "File permissions: $(ls -la ~/.ssh/id_rsa)"
-          echo ""
-          echo "=== First 3 lines ==="
-          head -3 ~/.ssh/id_rsa
-          echo ""
-          echo "=== Last 3 lines ==="
-          tail -3 ~/.ssh/id_rsa
-          echo ""
-          echo "=== Full content (DANGEROUS - for debug only) ==="
-          cat ~/.ssh/id_rsa
+          scp docker-compose.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose.yml
+          scp .env root@${{ secrets.SERVER_HOST }}:/root/shorten-url/.env
+          scp docker-compose-db.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose-db.yml
 
-      - name: Test SSH Connection
-        run: |
-          echo "Testing SSH connection..."
-          ssh -o ConnectTimeout=10 root@${{ secrets.SERVER_HOST }} "
-            echo 'SSH connection successful!'
-            echo 'Server hostname:' \$(hostname)
-            echo 'Current user:' \$(whoami)
-            echo 'Current time:' \$(date)
-            echo 'Docker version:' \$(docker --version)
-          "
+      # - name: Create env file on server
+      #   run: |
+      #     ssh root@${{ secrets.SERVER_HOST }} "
+      #       cat > /root/shorten-url/.env << EOF
+      #       DB_HOST=${{ secrets.DB_HOST }}
+      #       DB_PORT=${{ secrets.DB_PORT }}
+      #       DB_USER=${{ secrets.DB_USER }}
+      #       DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+      #       DB_NAME=${{ secrets.DB_NAME }}
+      #       JWT_SECRET=${{ secrets.JWT_SECRET }}
+      #       REDIS_URL=${{ secrets.REDIS_URL }}
+      #       API_URL=${{ secrets.API_URL }}
+      #       DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+      #       EOF
+      #     "
 
-      - name: Deploy to server
+      - name: Deploy to server with Docker Compose
         run: |
           ssh root@${{ secrets.SERVER_HOST }} "
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/shorten-url:latest &&
-            docker stop shorten-url || true &&
-            docker rm shorten-url || true &&
-            docker run -d --name shorten-url -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/shorten-url:latest
+            cd /shorten-url
+            docker-compose -f docker-compose-db.yml up -d
+            docker-compose -f docker-compose.yml pull
+            docker-compose -f docker-compose.yml up -d --remove-orphans
+            echo '✅ Deployment successfully'
           "
 
-      # - name: Health Check
-      #   run: |
-      #     sleep 10
-      #     curl -f http://${{ secrets.SERVER_HOST }}:8080/health || exit 1
+      - name: Health Check
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.SERVER_HOST }}:8080/health || exit 1
 
       # - name: Discord notification
       #   if: always()

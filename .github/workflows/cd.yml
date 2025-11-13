@@ -82,7 +82,7 @@ jobs:
       - name: Deploy to server with Docker Compose
         run: |
           ssh root@${{ secrets.SERVER_HOST }} "
-            cd /shorten-url
+            cd /root/shorten-url
             docker-compose -f docker-compose-db.yaml up -d
             docker-compose -f docker-compose.yaml pull
             docker-compose -f docker-compose.yaml up -d --remove-orphans

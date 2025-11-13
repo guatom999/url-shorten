@@ -1,9 +1,7 @@
 version: "3.8"
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: badzboss/shorten-url:latest
     container_name: shorten-url-app
     volumes:
       - ./.env:/.env

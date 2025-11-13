@@ -44,25 +44,40 @@ jobs:
 
       - name: Copy compose file to server
         run: |
-          scp docker-compose.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose.yaml
-          scp .env root@${{ secrets.SERVER_HOST }}:/root/shorten-url/.env
-          scp docker-compose-db.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose-db.yaml
+          ssh root@${{ secrets.SERVER_HOST }} "mkdir -p /root/shorten-url"
+          scp docker-compose.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/
+          scp docker-compose-db.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/
 
-      # - name: Create env file on server
-      #   run: |
-      #     ssh root@${{ secrets.SERVER_HOST }} "
-      #       cat > /root/shorten-url/.env << EOF
-      #       DB_HOST=${{ secrets.DB_HOST }}
-      #       DB_PORT=${{ secrets.DB_PORT }}
-      #       DB_USER=${{ secrets.DB_USER }}
-      #       DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-      #       DB_NAME=${{ secrets.DB_NAME }}
-      #       JWT_SECRET=${{ secrets.JWT_SECRET }}
-      #       REDIS_URL=${{ secrets.REDIS_URL }}
-      #       API_URL=${{ secrets.API_URL }}
-      #       DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-      #       EOF
-      #     "
+      - name: Create env file on server
+        run: |
+          ssh root@${{ secrets.SERVER_HOST }} "
+            cat > /root/shorten-url/.env << EOF
+            PORT=8085
+            GIN_MODE=release
+            APP_ENV=production
+            APP_NAME=shorten-url
+
+            SERVER_HOST=localhost
+            SERVER_PORT=8085
+
+            DB_DRIVER=postgres
+            DB_HOST=postgres-shorten-url-db
+            DB_PORT=5432
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD}}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_SSL_MODE=disable
+
+            REDIS_HOST=localhost
+            REDIS_PORT=6379
+            REDIS_PASSWORD=
+            REDIS_DB=0
+
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_EXPIRES_IN=24h
+
+            API_BASE_URL=${{ secrets.API_BASE_URL }}
+          "
 
       - name: Deploy to server with Docker Compose
         run: |
@@ -77,7 +92,7 @@ jobs:
       - name: Health Check
         run: |
           sleep 10
-          curl -f http://${{ secrets.SERVER_HOST }}:8080/health || exit 1
+          curl -f http://${{ secrets.SERVER_HOST }}:80805/health || exit 1
 
       # - name: Discord notification
       #   if: always()

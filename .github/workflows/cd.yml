@@ -92,7 +92,7 @@ jobs:
       - name: Health Check
         run: |
           sleep 10
-          curl -f http://${{ secrets.SERVER_HOST }}:80805/health || exit 1
+          curl -f http://${{ secrets.SERVER_HOST }}:8085/health || exit 1
 
       # - name: Discord notification
       #   if: always()

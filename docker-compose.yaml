@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: shorten-url-app
+    volumes:
+      - ./.env:/.env
+    ports:
+      - "8085:8085"
+    networks:
+      - shorten-url-shared
+
+networks:
+  shorten-url-shared:
+    external: true

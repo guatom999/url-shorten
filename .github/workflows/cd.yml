@@ -42,9 +42,9 @@ jobs:
 
       - name: Copy compose file to server
         run: |
-          scp docker-compose.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose.yml
+          scp docker-compose.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose.yaml
           scp .env root@${{ secrets.SERVER_HOST }}:/root/shorten-url/.env
-          scp docker-compose-db.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose-db.yml
+          scp docker-compose-db.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/docker-compose-db.yaml
 
       # - name: Create env file on server
       #   run: |
@@ -66,9 +66,9 @@ jobs:
         run: |
           ssh root@${{ secrets.SERVER_HOST }} "
             cd /shorten-url
-            docker-compose -f docker-compose-db.yml up -d
-            docker-compose -f docker-compose.yml pull
-            docker-compose -f docker-compose.yml up -d --remove-orphans
+            docker-compose -f docker-compose-db.yaml up -d
+            docker-compose -f docker-compose.yaml pull
+            docker-compose -f docker-compose.yaml up -d --remove-orphans
             echo '✅ Deployment successfully'
           "
 

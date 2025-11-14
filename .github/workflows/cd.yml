@@ -46,7 +46,6 @@ jobs:
         run: |
           ssh root@${{ secrets.SERVER_HOST }} "mkdir -p /root/shorten-url"
           scp docker-compose.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/
-          scp docker-compose-db.yaml root@${{ secrets.SERVER_HOST }}:/root/shorten-url/
 
       - name: Create env file on server
         run: |

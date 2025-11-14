@@ -83,7 +83,6 @@ jobs:
         run: |
           ssh root@${{ secrets.SERVER_HOST }} "
             cd /root/shorten-url
-            docker compose -f docker-compose-db.yaml up -d
             docker compose -f docker-compose.yaml pull
             docker compose -f docker-compose.yaml up -d --remove-orphans
             echo '✅ Deployment successfully'

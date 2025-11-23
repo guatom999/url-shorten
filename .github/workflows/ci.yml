@@ -66,28 +66,8 @@ jobs:
 
           COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep total | awk '{print $3}' || echo "N/A")
 
-          curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '{
-            "embeds": [{
-              "title": "'"$EMOJI"' Shorten-URL CI Pipeline",
-              "description": "'"$MESSAGE"'",
-              "color": '$COLOR',
-              "fields": [
-                {
-                  "name": "Status",
-                  "value": "'"${{ job.status }}"'",
-                  "inline": true
-                },
-                {
-                  "name": "Service Coverage",
-                  "value": "'"$COVERAGE"'",
-                  "inline": true
-                },
-                {
-                  "name": "Branch",
-                  "value": "'"${{ github.ref_name }}"'",
-                  "inline": true
-                }
-              ],
-              "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
-            }]
+          curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '
+          {
+            "project_name": "Shorten-Url", 
+            "status": "$COLOR ✅ Coverage is $COVERAGE"
           }'

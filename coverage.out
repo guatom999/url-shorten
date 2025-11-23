@@ -1,0 +1,24 @@
+mode: atomic
+shorten-url/internal/service/service.go:28.62,32.2 1 19
+shorten-url/internal/service/service.go:34.93,37.16 2 3
+shorten-url/internal/service/service.go:37.16,39.3 1 1
+shorten-url/internal/service/service.go:41.2,41.68 1 2
+shorten-url/internal/service/service.go:41.68,43.3 1 1
+shorten-url/internal/service/service.go:45.2,45.29 1 1
+shorten-url/internal/service/service.go:48.83,50.48 1 6
+shorten-url/internal/service/service.go:50.48,52.3 1 2
+shorten-url/internal/service/service.go:54.2,54.66 1 4
+shorten-url/internal/service/service.go:54.66,56.3 1 2
+shorten-url/internal/service/service.go:58.2,58.12 1 2
+shorten-url/internal/service/service.go:61.123,64.16 2 2
+shorten-url/internal/service/service.go:64.16,67.3 2 1
+shorten-url/internal/service/service.go:69.2,75.8 1 1
+shorten-url/internal/service/service.go:78.116,81.16 2 2
+shorten-url/internal/service/service.go:81.16,84.3 2 1
+shorten-url/internal/service/service.go:86.2,86.17 1 1
+shorten-url/internal/service/service.go:90.114,98.16 3 4
+shorten-url/internal/service/service.go:98.16,101.3 2 2
+shorten-url/internal/service/service.go:103.2,109.8 1 2
+shorten-url/internal/service/service.go:112.107,115.16 2 2
+shorten-url/internal/service/service.go:115.16,117.3 1 1
+shorten-url/internal/service/service.go:119.2,126.8 1 1

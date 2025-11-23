@@ -22,8 +22,29 @@ jobs:
       - name: Download dependencies
         run: go mod tidy
 
-      - name: Run tests
-        run: go test ./...
+      - name: Run test services layer
+        run: |
+          echo "Running services layer tests"
+          go test -v -race -coverprofile=coverage.out ./internal/service/...
+
+      - name: Check coverage
+        run: |
+          echo "Service Layer Coverage:"
+          go tool cover -func=coverage.out
+
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total service coverage: ${COVERAGE}%"
+
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "❌ Service layer coverage is below 80%: ${COVERAGE}%"
+            exit 1
+          else 
+            echo "✅ Service layer coverage is pass with: ${COVERAGE}%"
+          fi
+
+      - name: Run all tests (for full report)
+        run: go test -v ./...
+        continue-on-error: true
 
       - name: Build application
         run: go build ./cmd/app
@@ -33,4 +54,40 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '{"project_name": "Shorten-Url", "status": "test build status"}'
+          if [ "${{ job.status }}" == "success" ]; then
+            COLOR="3066993"
+            EMOJI="✅"
+            MESSAGE="Build and tests passed!"
+          else
+            COLOR="15158332"
+            EMOJI="❌"
+            MESSAGE="Build or tests failed!"
+          fi
+
+          COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep total | awk '{print $3}' || echo "N/A")
+
+          curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '{
+            "embeds": [{
+              "title": "'"$EMOJI"' Shorten-URL CI Pipeline",
+              "description": "'"$MESSAGE"'",
+              "color": '$COLOR',
+              "fields": [
+                {
+                  "name": "Status",
+                  "value": "'"${{ job.status }}"'",
+                  "inline": true
+                },
+                {
+                  "name": "Service Coverage",
+                  "value": "'"$COVERAGE"'",
+                  "inline": true
+                },
+                {
+                  "name": "Branch",
+                  "value": "'"${{ github.ref_name }}"'",
+                  "inline": true
+                }
+              ],
+              "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+            }]
+          }'

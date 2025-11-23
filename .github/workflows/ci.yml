@@ -69,5 +69,31 @@ jobs:
           curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '
           {
             "project_name": "Shorten-Url", 
-            "status": "$COLOR ✅ Coverage is $COVERAGE"
+            "status": "✅ Coverage is '"$COVERAGE"'"
           }'
+
+          # curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '{
+          #   "embeds": [{
+          #     "title": "'"$EMOJI"' Shorten-URL CI Pipeline",
+          #     "description": "'"$MESSAGE"'",
+          #     "color": '$COLOR',
+          #     "fields": [
+          #       {
+          #         "name": "Status",
+          #         "value": "'"${{ job.status }}"'",
+          #         "inline": true
+          #       },
+          #       {
+          #         "name": "Service Coverage",
+          #         "value": "'"$COVERAGE"'",
+          #         "inline": true
+          #       },
+          #       {
+          #         "name": "Branch",
+          #         "value": "'"${{ github.ref_name }}"'",
+          #         "inline": true
+          #       }
+          #     ],
+          #     "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
+          #   }]
+          # }'

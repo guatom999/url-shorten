@@ -58,7 +58,7 @@ jobs:
           COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep total | awk '{print $3}' || echo "N/A")
 
           if [ "${{ job.status }}" == "success" ]; then
-            COLOR="3066993"
+            COLOR=3066993
             MESSAGE="Build and tests passed!"
 
             curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '
@@ -70,7 +70,7 @@ jobs:
             }'
 
           else
-            COLOR="15158332"
+            COLOR=15158332
             MESSAGE="Build or tests failed!"
 
             curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '

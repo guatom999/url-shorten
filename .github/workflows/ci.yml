@@ -54,46 +54,30 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            COLOR="3066993"
-            EMOJI="✅"
-            MESSAGE="Build and tests passed!"
-          else
-            COLOR="15158332"
-            EMOJI="❌"
-            MESSAGE="Build or tests failed!"
-          fi
 
           COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep total | awk '{print $3}' || echo "N/A")
 
-          curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '
-          {
-            "project_name": "Shorten-Url", 
-            "status": "✅ Coverage is '"$COVERAGE"'"
-          }'
+          if [ "${{ job.status }}" == "success" ]; then
+            COLOR="3066993"
+            MESSAGE="Build and tests passed!"
 
-          # curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '{
-          #   "embeds": [{
-          #     "title": "'"$EMOJI"' Shorten-URL CI Pipeline",
-          #     "description": "'"$MESSAGE"'",
-          #     "color": '$COLOR',
-          #     "fields": [
-          #       {
-          #         "name": "Status",
-          #         "value": "'"${{ job.status }}"'",
-          #         "inline": true
-          #       },
-          #       {
-          #         "name": "Service Coverage",
-          #         "value": "'"$COVERAGE"'",
-          #         "inline": true
-          #       },
-          #       {
-          #         "name": "Branch",
-          #         "value": "'"${{ github.ref_name }}"'",
-          #         "inline": true
-          #       }
-          #     ],
-          #     "timestamp": "'"$(date -u +%Y-%m-%dT%H:%M:%SZ)"'"
-          #   }]
-          # }'
+            curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '
+            {
+              "project_name": "Shorten-Url-Api", 
+              "status": "'"${{ job.status }}"'", 
+              "color" : "'$COLOR'"
+              "message" : " ✅ '"${MESSAGE}"' | Coverage: '"${COVERAGE}"' "
+            }'
+
+          else
+            COLOR="15158332"
+            MESSAGE="Build or tests failed!"
+
+            curl -H "Content-Type: application/json" -X POST "$DISCORD_WEBHOOK_URL" -d '
+            {
+              "project_name": "Shorten-Url-Api", 
+              "status": "'"${{ job.status }}"'", 
+              "color" : "'$COLOR'"
+              "message" : " ❌ '"${MESSAGE}"' | Coverage: '"${COVERAGE}"' "
+            }'
+          fi

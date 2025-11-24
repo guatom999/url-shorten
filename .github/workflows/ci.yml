@@ -65,7 +65,7 @@ jobs:
             {
               "project_name": "Shorten-Url-Api", 
               "status": "'"${{ job.status }}"'", 
-              "color" : "'$COLOR'"
+              "color" : 3066993,
               "message" : " ✅ '"${MESSAGE}"' | Coverage: '"${COVERAGE}"' "
             }'
 
@@ -77,7 +77,7 @@ jobs:
             {
               "project_name": "Shorten-Url-Api", 
               "status": "'"${{ job.status }}"'", 
-              "color" : "'$COLOR'"
+              "color" : 15158332,
               "message" : " ❌ '"${MESSAGE}"' | Coverage: '"${COVERAGE}"' "
             }'
           fi

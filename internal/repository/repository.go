@@ -13,6 +13,7 @@ import (
 // Example repository interface - modify as needed
 type URLRepository interface {
 	Create(ctx context.Context, url *model.URL) (*model.URLInterpeter, error)
+	CreateQrCode(ctx context.Context, url *model.URL) (*model.URLInterpeter, error)
 	GetByShortCode(ctx context.Context, shortCode string) (*model.URL, error)
 	UpdateShortUrl(pctx context.Context, shortCode string, updatedUrl string) (*model.URL, error)
 	DeleteByShortCode(ctx context.Context, shortCode string) error
@@ -30,6 +31,67 @@ func NewURLRepository(db *sqlx.DB) URLRepository {
 	return &urlRepository{
 		db: db,
 	}
+}
+
+func (r *urlRepository) IsShortCodeExists(pctx context.Context, shortCode string) bool {
+
+	ctx, cancel := context.WithTimeout(pctx, time.Second*5)
+	defer cancel()
+
+	query := `SELECT COUNT(1) FROM urls WHERE short_code = $1`
+
+	var count int
+	err := r.db.QueryRowContext(ctx, query, shortCode).Scan(&count)
+	if err != nil {
+		log.Printf("Error checking if short code exists: %v", err)
+		return false
+	}
+
+	return count > 0
+}
+
+func (r *urlRepository) Create(ctx context.Context, url *model.URL) (*model.URLInterpeter, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	url.ClickCount = 1
+	url.QrCodeUrl = ""
+
+	query := `INSERT INTO urls (short_code, original_url,qrcode_url, click_count) VALUES ($1, $2, $3, $4) RETURNING id, created_at, updated_at`
+
+	err := r.db.QueryRowContext(ctx, query, url.ShortCode, url.OriginalURL, url.QrCodeUrl, url.ClickCount).Scan(&url.ID, &url.CreatedAt, &url.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.URLInterpeter{
+		ID:        url.ID,
+		CreatedAt: url.CreatedAt,
+		UpdatedAt: url.UpdatedAt,
+	}, nil
+}
+
+func (r *urlRepository) CreateQrCode(pctx context.Context, url *model.URL) (*model.URLInterpeter, error) {
+
+	ctx, cancel := context.WithTimeout(pctx, time.Second*5)
+	defer cancel()
+
+	query := `UPDATE urls
+		SET qrcode_url = $1, updated_at = CURRENT_TIMESTAMP
+		WHERE short_code = $2
+		RETURNING id, created_at, updated_at`
+
+	err := r.db.QueryRowContext(ctx, query, url.QrCodeUrl, url.ShortCode).Scan(&url.ID, &url.CreatedAt, &url.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.URLInterpeter{
+		ID:        url.ID,
+		CreatedAt: url.CreatedAt,
+		UpdatedAt: url.UpdatedAt,
+	}, nil
 }
 
 func (r *urlRepository) UpdateShortUrlCount(pctx context.Context, shortCode string) error {
@@ -66,7 +128,7 @@ func (r *urlRepository) GetByShortCode(ctx context.Context, shortCode string) (*
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := `SELECT id , short_code , original_url , click_count , created_at , updated_at FROM urls WHERE short_code = $1`
+	query := `SELECT id, short_code, original_url, qrcode_url, click_count, created_at, updated_at FROM urls WHERE short_code = $1`
 
 	url := new(model.URL)
 	err := r.db.GetContext(ctx, url, query, shortCode)
@@ -131,39 +193,4 @@ func (r *urlRepository) DeleteByShortCode(ctx context.Context, shortCode string)
 
 	log.Printf("Successfully deleted URL with short code: %s", shortCode)
 	return nil
-}
-
-func (r *urlRepository) Create(ctx context.Context, url *model.URL) (*model.URLInterpeter, error) {
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
-	defer cancel()
-
-	url.ClickCount = 1
-
-	query := `INSERT INTO urls (short_code, original_url,click_count) VALUES ($1, $2 ,$3) RETURNING id, created_at, updated_at`
-
-	err := r.db.QueryRowContext(ctx, query, url.ShortCode, url.OriginalURL, url.ClickCount).Scan(&url.ID, &url.CreatedAt, &url.UpdatedAt)
-
-	return &model.URLInterpeter{
-		ID:        url.ID,
-		CreatedAt: url.CreatedAt,
-		UpdatedAt: url.UpdatedAt,
-	}, err
-}
-
-func (r *urlRepository) IsShortCodeExists(pctx context.Context, shortCode string) bool {
-
-	ctx, cancel := context.WithTimeout(pctx, time.Second*5)
-	defer cancel()
-
-	query := `SELECT COUNT(1) FROM urls WHERE short_code = $1`
-
-	var count int
-	err := r.db.QueryRowContext(ctx, query, shortCode).Scan(&count)
-	if err != nil {
-		log.Printf("Error checking if short code exists: %v", err)
-		return false
-	}
-
-	return count > 0
 }

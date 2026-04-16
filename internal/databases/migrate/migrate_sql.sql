@@ -6,6 +6,8 @@ IF NOT EXISTS urls
   short_code   VARCHAR
 (255) NOT NULL UNIQUE,
   original_url TEXT NOT NULL,
+  qrcode_url   VARCHAR
+(255),
   click_count  INTEGER DEFAULT 0,
   created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP

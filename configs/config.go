@@ -14,8 +14,9 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Host string `yaml:"host"`
-	Port string `yaml:"port"`
+	Host    string `yaml:"host"`
+	Port    string `yaml:"port"`
+	BaseURL string `yaml:"base_url"`
 }
 
 type DatabaseConfig struct {
@@ -44,8 +45,9 @@ func LoadConfig(envPath string) (*Config, error) {
 
 	return &Config{
 		Server: ServerConfig{
-			Host: os.Getenv("SERVER_HOST"),
-			Port: os.Getenv("SERVER_PORT"),
+			Host:    os.Getenv("SERVER_HOST"),
+			Port:    os.Getenv("SERVER_PORT"),
+			BaseURL: os.Getenv("API_BASE_URL"),
 		},
 		Database: DatabaseConfig{
 			Host:     os.Getenv("DB_HOST"),

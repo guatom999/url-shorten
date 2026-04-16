@@ -22,6 +22,15 @@ func (mr *MockURLRepository) Create(ctx context.Context, url *model.URL) (*model
 
 	return args.Get(0).(*model.URLInterpeter), args.Error(1)
 }
+func (mr *MockURLRepository) CreateQrCode(ctx context.Context, url *model.URL) (*model.URLInterpeter, error) {
+	args := mr.Called(ctx, url)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+
+	return args.Get(0).(*model.URLInterpeter), args.Error(1)
+
+}
 func (mr *MockURLRepository) GetByShortCode(ctx context.Context, shortCode string) (*model.URL, error) {
 
 	args := mr.Called(ctx, shortCode)

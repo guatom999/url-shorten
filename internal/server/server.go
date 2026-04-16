@@ -72,9 +72,10 @@ func (s *server) Start() {
 func (s *server) ShortenModules() {
 
 	shortenRepo := repository.NewURLRepository(s.db)
-	shortenService := service.NewURLService(shortenRepo)
+	shortenService := service.NewURLService(shortenRepo, s.cfg.Server.BaseURL)
 	shortenHandler := handler.NewHandler(shortenService)
 
+	s.app.Static("/temp", "temp")
 	s.app.GET("/:short_code", shortenHandler.GetShortenURL)
 
 	s.app.GET("/health", func(c echo.Context) error {
@@ -86,6 +87,7 @@ func (s *server) ShortenModules() {
 	route.GET("/:short_code", shortenHandler.RetrieveOriginalURL)
 	route.GET("/:short_code/stat", shortenHandler.GetUrlStatic)
 
+	route.POST("/:short_code/qrcode", shortenHandler.CreateQrCode)
 	route.PUT("/:short_code", shortenHandler.UpdateShortenURL)
 
 	route.DELETE("/:short_code", shortenHandler.DeleteUrl)

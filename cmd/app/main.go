@@ -13,7 +13,7 @@ func main() {
 
 	log.Println("Starting application...")
 
-	cfg, err := configs.LoadConfig("../../.env")
+	cfg, err := configs.LoadConfig(".env")
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
 	}

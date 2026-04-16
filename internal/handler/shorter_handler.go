@@ -15,6 +15,7 @@ import (
 type (
 	ShortenHandler interface {
 		CreateShortenURL(c echo.Context) error
+		CreateQrCode(c echo.Context) error
 		GetShortenURL(c echo.Context) error
 		RetrieveOriginalURL(c echo.Context) error
 		UpdateShortenURL(c echo.Context) error
@@ -147,6 +148,20 @@ func (h *shortenHandler) CreateShortenURL(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, shorten)
 
+}
+
+func (h *shortenHandler) CreateQrCode(c echo.Context) error {
+
+	ctx := context.Background()
+
+	shortCode := c.Param("short_code")
+
+	res, err := h.shortenService.CreateQrCode(ctx, shortCode)
+	if err != nil {
+		return h.handleError(c, err)
+	}
+
+	return c.JSON(http.StatusCreated, res)
 }
 
 func (h *shortenHandler) GetUrlStatic(c echo.Context) error {

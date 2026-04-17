@@ -154,9 +154,15 @@ func (h *shortenHandler) CreateQrCode(c echo.Context) error {
 
 	ctx := context.Background()
 
-	shortCode := c.Param("short_code")
+	req := new(entities.CreateQrcodeReq)
 
-	res, err := h.shortenService.CreateQrCode(ctx, shortCode)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "invalid request body",
+		})
+	}
+
+	res, err := h.shortenService.CreateQrCode(ctx, req.OriginalUrl)
 	if err != nil {
 		return h.handleError(c, err)
 	}

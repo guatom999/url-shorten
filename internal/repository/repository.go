@@ -13,7 +13,7 @@ import (
 // Example repository interface - modify as needed
 type URLRepository interface {
 	Create(ctx context.Context, url *model.URL) (*model.URLInterpeter, error)
-	CreateQrCode(ctx context.Context, url *model.URL) (*model.URLInterpeter, error)
+	CreateQrCode(ctx context.Context, url *model.Qrcode) (*model.QrcodeInterpeter, error)
 	GetByShortCode(ctx context.Context, shortCode string) (*model.URL, error)
 	UpdateShortUrl(pctx context.Context, shortCode string, updatedUrl string) (*model.URL, error)
 	DeleteByShortCode(ctx context.Context, shortCode string) error
@@ -72,22 +72,21 @@ func (r *urlRepository) Create(ctx context.Context, url *model.URL) (*model.URLI
 	}, nil
 }
 
-func (r *urlRepository) CreateQrCode(pctx context.Context, url *model.URL) (*model.URLInterpeter, error) {
+func (r *urlRepository) CreateQrCode(pctx context.Context, url *model.Qrcode) (*model.QrcodeInterpeter, error) {
 
 	ctx, cancel := context.WithTimeout(pctx, time.Second*5)
 	defer cancel()
 
-	query := `UPDATE urls
-		SET qrcode_url = $1, updated_at = CURRENT_TIMESTAMP
-		WHERE short_code = $2
-		RETURNING id, created_at, updated_at`
+	url.ClickCount = 1
 
-	err := r.db.QueryRowContext(ctx, query, url.QrCodeUrl, url.ShortCode).Scan(&url.ID, &url.CreatedAt, &url.UpdatedAt)
+	query := `INSERT INTO qrcode (original_url, qrcode_url, click_count) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at`
+
+	err := r.db.QueryRowContext(ctx, query, url.OriginalURL, url.QrCodeUrl, url.ClickCount).Scan(&url.ID, &url.CreatedAt, &url.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.URLInterpeter{
+	return &model.QrcodeInterpeter{
 		ID:        url.ID,
 		CreatedAt: url.CreatedAt,
 		UpdatedAt: url.UpdatedAt,

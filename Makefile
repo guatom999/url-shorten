@@ -1,3 +1,4 @@
+# Makefile for Go Project Generated 
 .PHONY: help dev build test clean run fmt lint tidy
 
 # Default target
@@ -49,3 +50,8 @@ setup: ## Setup development environment
 	@cp .env.example .env 2>/dev/null || true
 	@go mod tidy
 	@echo "Setup complete!"
+
+
+go test -v -coverprofile=coverage.out -covermode=atomic ./internal/service/...
+go tool cover -html=coverage.out -o coverage.html
+start coverage.html  # Windows

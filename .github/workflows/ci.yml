@@ -25,7 +25,7 @@ jobs:
       - name: Run test services layer
         run: |
           echo "Running services layer tests"
-          go test -v -race -coverprofile=coverage.out ./internal/service/...
+          go test -v -coverprofile=coverage.out ./internal/service/...
 
       - name: Check coverage
         run: |

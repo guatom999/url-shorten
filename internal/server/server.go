@@ -87,7 +87,8 @@ func (s *server) ShortenModules() {
 	route.GET("/:short_code", shortenHandler.RetrieveOriginalURL)
 	route.GET("/:short_code/stat", shortenHandler.GetUrlStatic)
 
-	route.POST("/:short_code/qrcode", shortenHandler.CreateQrCode)
+	route.POST("/qrcode", shortenHandler.CreateQrCode)
+
 	route.PUT("/:short_code", shortenHandler.UpdateShortenURL)
 
 	route.DELETE("/:short_code", shortenHandler.DeleteUrl)

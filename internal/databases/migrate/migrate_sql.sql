@@ -19,3 +19,16 @@ IF NOT EXISTS idx_urls_short_code ON urls
 CREATE INDEX
 IF NOT EXISTS idx_urls_created_at ON urls
 (created_at);
+
+CREATE TABLE
+IF NOT EXISTS qrcode
+(
+    id           SERIAL PRIMARY KEY,
+    original_url TEXT NOT NULL,
+    qrcode_url   VARCHAR
+(255),
+    click_count  INTEGER DEFAULT 0,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+

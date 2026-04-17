@@ -86,3 +86,6 @@ temp/
 *.sqlite3
 
 *.env
+
+.gocache/
+coverage.out

@@ -17,3 +17,18 @@ type URLInterpeter struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type Qrcode struct {
+	ID          uint      `db:"id" json:"id"`
+	OriginalURL string    `db:"original_url" json:"original_url"`
+	QrCodeUrl   string    `db:"qrcode_url" json:"qrcode_url"`
+	ClickCount  int       `db:"click_count" json:"click_count"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+}
+
+type QrcodeInterpeter struct {
+	ID        uint
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}

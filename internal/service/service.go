@@ -124,24 +124,24 @@ func (s *urlService) ShortenURL(pctx context.Context, originalURL string) (*enti
 	}, nil
 }
 
-func (s *urlService) CreateQrCode(pctx context.Context, shortCode string) (*entities.CreateQrCodeRes, error) {
+func (s *urlService) CreateQrCode(pctx context.Context, originalURL string) (*entities.CreateQrCodeRes, error) {
 
-	if strings.TrimSpace(shortCode) == "" {
-		return nil, appErrors.NewInvalidInputError("short code is required")
+	if strings.TrimSpace(originalURL) == "" {
+		return nil, appErrors.NewInvalidInputError("original url is required")
 	}
 
-	existingURL, err := s.repo.GetByShortCode(pctx, shortCode)
-	if err != nil {
-		log.Printf("Error: failed to find short url for qr code %s", err.Error())
-		return nil, appErrors.NewNotFoundError("short url was not found")
-	}
+	// existingURL, err := s.repo.GetByShortCode(pctx, originalURL)
+	// if err != nil {
+	// 	log.Printf("Error: failed to find short url for qr code %s", err.Error())
+	// 	return nil, appErrors.NewNotFoundError("short url was not found")
+	// }
 
 	if err := os.MkdirAll("temp", 0o755); err != nil {
 		log.Printf("Error: failed to create temp directory %s", err.Error())
 		return nil, appErrors.NewInternalError("failed to prepare qrcode directory", err)
 	}
 
-	targetURL, err := url.JoinPath(s.baseURL, shortCode)
+	targetURL, err := url.JoinPath(s.baseURL, originalURL)
 	if err != nil {
 		log.Printf("Error: failed to build qrcode target url %s", err.Error())
 		return nil, appErrors.NewInternalError("failed to build qrcode url", err)
@@ -167,20 +167,24 @@ func (s *urlService) CreateQrCode(pctx context.Context, shortCode string) (*enti
 		return nil, appErrors.NewInternalError("failed to build public qrcode url", err)
 	}
 
-	existingURL.QrCodeUrl = publicImageURL
-	updatedURL, err := s.repo.CreateQrCode(pctx, existingURL)
+	// existingURL.QrCodeUrl = publicImageURL
+	req := &model.Qrcode{
+		OriginalURL: originalURL,
+		QrCodeUrl:   publicImageURL,
+	}
+
+	qrcodeRes, err := s.repo.CreateQrCode(pctx, req)
 	if err != nil {
 		log.Printf("Error: failed to save qrcode url %s", err.Error())
 		return nil, appErrors.NewInternalError("failed to save qrcode url", err)
 	}
 
 	return &entities.CreateQrCodeRes{
-		Id:          strconv.Itoa(int(updatedURL.ID)),
-		ShortUrl:    existingURL.ShortCode,
-		OriginalURL: existingURL.OriginalURL,
-		QrCodeURL:   publicImageURL,
-		CreatedAt:   updatedURL.CreatedAt,
-		UpdatedAt:   updatedURL.UpdatedAt,
+		Id:          strconv.Itoa(int(qrcodeRes.ID)),
+		OriginalURL: req.OriginalURL,
+		QrCodeURL:   req.QrCodeUrl,
+		CreatedAt:   qrcodeRes.CreatedAt,
+		UpdatedAt:   qrcodeRes.UpdatedAt,
 	}, nil
 }
 

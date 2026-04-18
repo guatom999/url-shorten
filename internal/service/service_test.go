@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"shorten-url/configs"
 	"shorten-url/internal/entities"
 	appErrors "shorten-url/internal/errors"
 	"shorten-url/internal/model"
@@ -15,10 +16,18 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func testCfg() *configs.Config {
+	return &configs.Config{
+		Server: configs.ServerConfig{
+			BaseURL: "http://localhost:8080",
+		},
+	}
+}
+
 func TestShortenURL_Success(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	originalUrl := "http://example.com"
@@ -48,7 +57,7 @@ func TestShortenURL_Success(t *testing.T) {
 func TestShortenURL_Error(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	originalUrl := "http://example.com"
@@ -68,7 +77,7 @@ func TestShortenURL_Error(t *testing.T) {
 func TestGetOriginalURL_Success(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -95,7 +104,7 @@ func TestGetOriginalURL_Success(t *testing.T) {
 func TestGetOriginalURL_NotFound(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "notfound"
@@ -118,7 +127,7 @@ func TestGetOriginalURL_NotFound(t *testing.T) {
 func TestGetOriginalURL_UpdateCountError(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -145,7 +154,7 @@ func TestGetOriginalURL_UpdateCountError(t *testing.T) {
 func TestRetrieveOriginalURL_Success(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -178,7 +187,7 @@ func TestRetrieveOriginalURL_Success(t *testing.T) {
 func TestRetrieveOriginalURL_NotFound(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "notfound"
@@ -198,7 +207,7 @@ func TestRetrieveOriginalURL_NotFound(t *testing.T) {
 func TestUpdateShortUrl_Success(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -227,7 +236,7 @@ func TestUpdateShortUrl_Success(t *testing.T) {
 func TestUpdateShortUrl_NotFound(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "notfound"
@@ -248,7 +257,7 @@ func TestUpdateShortUrl_NotFound(t *testing.T) {
 func TestDeleteShortUrl_Success(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -268,7 +277,7 @@ func TestDeleteShortUrl_Success(t *testing.T) {
 func TestDeleteShortUrl_NotFound(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "notfound"
@@ -289,7 +298,7 @@ func TestDeleteShortUrl_NotFound(t *testing.T) {
 
 func TestDeleteShortUrl_DeleteError(t *testing.T) {
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -309,7 +318,7 @@ func TestDeleteShortUrl_DeleteError(t *testing.T) {
 
 func TestGetUrlStatic_Success(t *testing.T) {
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "abc123"
@@ -343,7 +352,7 @@ func TestGetUrlStatic_Success(t *testing.T) {
 func TestGetUrlStatic_NotFound(t *testing.T) {
 
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	shortCode := "notfound"
@@ -365,7 +374,7 @@ func TestGetUrlStatic_NotFound(t *testing.T) {
 
 func TestCreateQrCode_EmptyURL(t *testing.T) {
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	result, err := service.CreateQrCode(ctx, "")
@@ -379,7 +388,7 @@ func TestCreateQrCode_EmptyURL(t *testing.T) {
 
 func TestCreateQrCode_Success(t *testing.T) {
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	now := time.Now()
@@ -403,7 +412,7 @@ func TestCreateQrCode_Success(t *testing.T) {
 
 func TestCreateQrCode_RepoError(t *testing.T) {
 	mockRepo := new(repository.MockURLRepository)
-	service := NewURLService(mockRepo)
+	service := NewURLService(mockRepo, testCfg())
 	ctx := context.Background()
 
 	mockRepo.On("CreateQrCode", ctx, mock.Anything).
@@ -466,7 +475,7 @@ func TestShortenURL_TableDriven(t *testing.T) {
 
 			mockRepo := new(repository.MockURLRepository)
 			tt.setupMock(mockRepo)
-			service := NewURLService(mockRepo)
+			service := NewURLService(mockRepo, testCfg())
 			ctx := context.Background()
 
 			result, err := service.ShortenURL(ctx, tt.originalURL)
@@ -530,7 +539,7 @@ func TestDeleteShortUrl_TableDriven(t *testing.T) {
 
 			mockRepo := new(repository.MockURLRepository)
 			tt.setupMock(mockRepo)
-			service := NewURLService(mockRepo)
+			service := NewURLService(mockRepo, testCfg())
 			ctx := context.Background()
 
 			err := service.DeleteShortUrl(ctx, tt.shortCode)

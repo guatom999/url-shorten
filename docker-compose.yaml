@@ -5,6 +5,7 @@ services:
     container_name: shorten-url-app
     volumes:
       - ./.env:/.env
+      - /root/shorten-url/temp:/temp
     ports:
       - "8085:8085"
     networks:

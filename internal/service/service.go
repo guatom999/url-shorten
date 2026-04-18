@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"shorten-url/configs"
 	"shorten-url/internal/entities"
 	appErrors "shorten-url/internal/errors"
 	"shorten-url/internal/model"
@@ -30,19 +31,15 @@ type URLService interface {
 }
 
 type urlService struct {
-	repo    repository.URLRepository
-	baseURL string
+	repo repository.URLRepository
+	cfg  *configs.Config
 }
 
-func NewURLService(repo repository.URLRepository, baseURL ...string) URLService {
-	resolvedBaseURL := "http://localhost:8080"
-	if len(baseURL) > 0 && strings.TrimSpace(baseURL[0]) != "" {
-		resolvedBaseURL = strings.TrimRight(strings.TrimSpace(baseURL[0]), "/")
-	}
+func NewURLService(repo repository.URLRepository, cfg *configs.Config) URLService {
 
 	return &urlService{
-		repo:    repo,
-		baseURL: resolvedBaseURL,
+		repo: repo,
+		cfg:  cfg,
 	}
 }
 
@@ -141,7 +138,7 @@ func (s *urlService) CreateQrCode(pctx context.Context, originalURL string) (*en
 		return nil, appErrors.NewInternalError("failed to prepare qrcode directory", err)
 	}
 
-	targetURL, err := url.JoinPath(s.baseURL, originalURL)
+	targetURL, err := url.JoinPath(s.cfg.Server.BaseURL, originalURL)
 	if err != nil {
 		log.Printf("Error: failed to build qrcode target url %s", err.Error())
 		return nil, appErrors.NewInternalError("failed to build qrcode url", err)
@@ -161,7 +158,7 @@ func (s *urlService) CreateQrCode(pctx context.Context, originalURL string) (*en
 		return nil, appErrors.NewInternalError("failed to save qrcode image", err)
 	}
 
-	publicImageURL, err := url.JoinPath(s.baseURL, "temp", fileName)
+	publicImageURL, err := url.JoinPath(s.cfg.Server.BaseURL, "temp", fileName)
 	if err != nil {
 		log.Printf("Error: failed to build public qrcode url %s", err.Error())
 		return nil, appErrors.NewInternalError("failed to build public qrcode url", err)

@@ -72,7 +72,7 @@ func (s *server) Start() {
 func (s *server) ShortenModules() {
 
 	shortenRepo := repository.NewURLRepository(s.db)
-	shortenService := service.NewURLService(shortenRepo, s.cfg.Server.BaseURL)
+	shortenService := service.NewURLService(shortenRepo, s.cfg)
 	shortenHandler := handler.NewHandler(shortenService)
 
 	s.app.Static("/temp", "temp")

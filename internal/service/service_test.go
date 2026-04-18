@@ -363,6 +363,61 @@ func TestGetUrlStatic_NotFound(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
+func TestCreateQrCode_EmptyURL(t *testing.T) {
+	mockRepo := new(repository.MockURLRepository)
+	service := NewURLService(mockRepo)
+	ctx := context.Background()
+
+	result, err := service.CreateQrCode(ctx, "")
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.IsType(t, &appErrors.AppError{}, err)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestCreateQrCode_Success(t *testing.T) {
+	mockRepo := new(repository.MockURLRepository)
+	service := NewURLService(mockRepo)
+	ctx := context.Background()
+
+	now := time.Now()
+
+	mockRepo.On("CreateQrCode", ctx, mock.Anything).
+		Return(&model.QrcodeInterpeter{
+			ID:        1,
+			CreatedAt: now,
+			UpdatedAt: now,
+		}, nil)
+
+	result, err := service.CreateQrCode(ctx, "abc123")
+
+	assert.NoError(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, "1", result.Id)
+	assert.NotEmpty(t, result.QrCodeURL)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestCreateQrCode_RepoError(t *testing.T) {
+	mockRepo := new(repository.MockURLRepository)
+	service := NewURLService(mockRepo)
+	ctx := context.Background()
+
+	mockRepo.On("CreateQrCode", ctx, mock.Anything).
+		Return(nil, errors.New("database error"))
+
+	result, err := service.CreateQrCode(ctx, "abc123")
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.IsType(t, &appErrors.AppError{}, err)
+
+	mockRepo.AssertExpectations(t)
+}
+
 func TestShortenURL_TableDriven(t *testing.T) {
 	tests := []struct {
 		name        string

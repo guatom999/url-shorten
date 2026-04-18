@@ -55,7 +55,8 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
 
-          COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep total | awk '{print $3}' || echo "N/A")
+          COVERAGE=$(go tool cover -func=coverage.out 2>/dev/null | grep total | awk '{print $3}')
+          COVERAGE=${COVERAGE:-N/A}
 
           if [ "${{ job.status }}" == "success" ]; then
             COLOR=3066993
